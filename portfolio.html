@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Representative CRM</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    header {
+      background-color: #007BFF;
+      color: #fff;
+      padding: 10px 20px;
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .dashboard {
+      margin-top: 30px;
+    }
+    .dashboard h2 {
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Medical Representative CRM</h1>
+  </header>
+  <div class="container">
+    <h2>Representative Data Entry</h2>
+    <form id="repForm">
+      <label for="name">Representative Name:</label>
+      <input type="text" id="name" placeholder="Enter name" required>
+
+      <label for="workArea">Work Area:</label>
+      <input type="text" id="workArea" placeholder="Enter work area" required>
+
+      <label for="location">Current Location:</label>
+      <input type="text" id="location" placeholder="Location will appear here" readonly>
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <div class="dashboard">
+      <h2>Manager Dashboard</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Work Area</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody id="dashboardTable">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Store submissions in memory for now
+    const representatives = [];
+
+    // Automatically capture the user's location
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const locationInput = document.getElementById('location');
+          const { latitude, longitude } = position.coords;
+          locationInput.value = `Lat: ${latitude}, Lng: ${longitude}`;
+        }, error => {
+          console.error("Error fetching location:", error);
+          alert("Unable to fetch location. Ensure GPS is enabled.");
+        });
+      } else {
+        alert("Geolocation is not supported by your browser.");
+      }
+    }
+
+    // Load location on page load
+    window.onload = getLocation;
+
+    // Handle form submission
+    document.getElementById('repForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const workArea = document.getElementById('workArea').value;
+      const location = document.getElementById('location').value;
+      const [lat, lng] = location.replace('Lat: ', '').replace('Lng: ', '').split(', ');
+      const timestamp = new Date().toLocaleString();
+
+      // Save data in memory
+      representatives.push({ name, workArea, lat, lng, timestamp });
+
+      // Clear form
+      document.getElementById('repForm').reset();
+      getLocation(); // Reset location
+
+      // Update dashboard
+      updateDashboard();
+    });
+
+    // Update dashboard table
+    function updateDashboard() {
+      const tableBody = document.getElementById('dashboardTable');
+      tableBody.innerHTML = ''; // Clear existing rows
+
+      representatives.forEach(rep => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${rep.name}</td>
+          <td>${rep.workArea}</td>
+          <td>${rep.lat}</td>
+          <td>${rep.lng}</td>
+          <td>${rep.timestamp}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>
